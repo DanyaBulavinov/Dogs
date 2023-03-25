@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation"
+    app:startDestination="@id/listFragment">
+
+    <fragment
+        android:id="@+id/listFragment"
+        android:name="com.example.dogs.view.ListFragment"
+        android:label="ListFragment" >
+        <action
+            android:id="@+id/action_listFragment_to_detainFragment"
+            app:destination="@id/detainFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/detainFragment"
+        android:name="com.example.dogs.view.DetailFragment"
+        android:label="DetainFragment" >
+        <action
+            android:id="@+id/action_detainFragment_to_listFragment"
+            app:destination="@id/listFragment" />
+        <argument
+            android:name="dogUuid"
+            app:argType="string"
+            android:defaultValue="1" />
+    </fragment>
+</navigation>
