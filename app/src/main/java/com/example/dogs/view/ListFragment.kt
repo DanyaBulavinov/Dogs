@@ -51,14 +51,6 @@ class ListFragment : Fragment() {
             layoutManager = LinearLayoutManager(context)
             adapter = dogListAdapter
         }
-//        binding.refreshLayout.setOnRefreshListener {
-//            with(binding) {
-//                dogsList.visibility = View.GONE
-//                listError.visibility = View.GONE
-//                loadingView.visibility = View.VISIBLE
-//            }
-//            binding.refreshLayout.isRefreshing = false
-//        }
 
         binding.refreshLayout.setOnRefreshListener {
             viewSetup()
@@ -75,11 +67,6 @@ class ListFragment : Fragment() {
         binding.loadingView.visibility = View.VISIBLE
     }
 
-//    private fun refreshDogList() {
-//        viewModel.getDogs()
-//        observeViewModel()
-//    }
-
     private fun observeViewModel() {
         viewModel.dogs.observe(viewLifecycleOwner) {
             binding.dogsList.visibility = View.VISIBLE
@@ -92,54 +79,6 @@ class ListFragment : Fragment() {
             binding.loadingView.visibility = if (it) View.VISIBLE else View.GONE
         }
     }
-
-
-//    private fun observeViewModel() {
-//        viewModel.dogsList.observe(viewLifecycleOwner) {
-//            it?.let { resource ->
-//                when (resource.status) {
-//                    Status.SUCCESS -> {
-//                        binding.dogsList.visibility = View.VISIBLE
-//                        binding.loadingView.visibility = View.GONE
-//                        resource.data?.let { dogs ->
-//                            retrieveList(dogs)
-//                            viewModel.storeDogsLocally(dogs)
-//                        }
-//                    }
-//                    Status.ERROR -> {
-//                        binding.dogsList.visibility = View.VISIBLE
-//                        binding.loadingView.visibility = View.GONE
-//                        Toast.makeText(context, it.message, Toast.LENGTH_LONG).show()
-//                    }
-//                    Status.LOADING -> {
-//                        binding.loadingView.visibility = View.VISIBLE
-//                        binding.dogsList.visibility = View.GONE
-//                    }
-//                }
-//            }
-//        }
-
-
-//        viewModel.dogs.observe(viewLifecycleOwner) {
-//            it?.let {
-//                binding.dogsList.visibility = View.VISIBLE
-//                dogListAdapter.updateDogList(it)
-//            }
-//        }
-//        viewModel.dogsLoadError.observe(viewLifecycleOwner) {
-//            it?.let {
-//                binding.listError.visibility = if (it) View.VISIBLE else View.GONE
-//            }
-//        }
-//        viewModel.loading.observe(viewLifecycleOwner) {
-//            it?.let {
-//                binding.loadingView.visibility = if (it) View.VISIBLE else View.GONE
-//                if (it) {
-//                    binding.listError.visibility = View.GONE
-//                    binding.dogsList.visibility = View.GONE
-//                }
-//            }
-//        }
 
     private fun retrieveList(dogs: List<DogBreed>) {
         dogListAdapter.apply {
