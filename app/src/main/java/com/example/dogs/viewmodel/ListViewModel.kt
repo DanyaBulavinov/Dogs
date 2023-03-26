@@ -11,7 +11,10 @@ import com.example.dogs.model.DogDatabase
 import com.example.dogs.repository.Repository
 import com.example.dogs.utils.Resource
 import com.example.dogs.utils.SharedPreferencesHelper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import retrofit2.Response
 
 class ListViewModel(application: Application, private val repository: Repository) :
     AndroidViewModel(application) {
@@ -19,15 +22,18 @@ class ListViewModel(application: Application, private val repository: Repository
 //    private val dogsService = Repository()
 //    private val disposable = CompositeDisposable()
 
-//    private val _dogs = MutableLiveData<List<DogBreed>>()
-//    val dogs: LiveData<List<DogBreed>>
-//        get() = _dogs
-//    private val _dogsLoadError = MutableLiveData<Boolean>()
-//    val dogsLoadError: LiveData<Boolean>
-//        get() = _dogsLoadError
-//    private val _loading = MutableLiveData<Boolean>()
-//    val loading: LiveData<Boolean>
-//        get() = _loading
+    private var prefHelper = SharedPreferencesHelper(getApplication())
+    private var refreshTime = 5 * 60 * 1000 * 1000 * 1000L
+
+    private val _dogs = MutableLiveData<List<DogBreed>>()
+    val dogs: LiveData<List<DogBreed>>
+        get() = _dogs
+    private val _dogsLoadError = MutableLiveData<Boolean>()
+    val dogsLoadError: LiveData<Boolean>
+        get() = _dogsLoadError
+    private val _loading = MutableLiveData<Boolean>()
+    val loading: LiveData<Boolean>
+        get() = _loading
 
 
 //    fun getDogs(){
@@ -36,11 +42,9 @@ class ListViewModel(application: Application, private val repository: Repository
 //            _dogs.value = response
 //        }
 //    }
-
-    private var prefHelper = SharedPreferencesHelper(getApplication())
-    private val _dogsList = MutableLiveData<Resource<List<DogBreed>>>()
-    val dogsList: LiveData<Resource<List<DogBreed>>>
-        get() = _dogsList
+//    private val _dogsList = MutableLiveData<Resource<List<DogBreed>>>()
+//    val dogsList: LiveData<Resource<List<DogBreed>>>
+//        get() = _dogsList
 
 //    fun getDogs() = liveData(Dispatchers.IO) {
 //        emit(Resource.loading(data = null))
@@ -51,35 +55,65 @@ class ListViewModel(application: Application, private val repository: Repository
 //        }
 //    }
 
+//    fun getDogs() {
+//        _dogsList.value = Resource.loading(data = null)
+//        viewModelScope.launch {
+//            try {
+//                _dogsList.postValue(Resource.success(data = repository.getDogs()))
+//            } catch (exception: Exception) {
+//                _dogsList.postValue(
+//                    Resource.error(
+//                        data = null,
+//                        message = exception.message ?: "Error Occurred!"
+//                    )
+//                )
+//            }
+//        }
+//    }
+
     fun getDogs() {
-        _dogsList.value = Resource.loading(data = null)
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
+            _loading.postValue(true)
             try {
-                _dogsList.postValue(Resource.success(data = repository.getDogs()))
+                val response = repository.getDogs()
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful) {
+                        storeDogsLocally(response.body())
+                    } else {
+                        onError()
+                    }
+                }
             } catch (exception: Exception) {
-                _dogsList.postValue(
-                    Resource.error(
-                        data = null,
-                        message = exception.message ?: "Error Occurred!"
-                    )
-                )
+                onError()
             }
         }
     }
 
-    fun storeDogsLocally(dogs: List<DogBreed>) {
+    private fun dogsRetrieved(dogsList: List<DogBreed>?){
+        _dogs.postValue(dogsList ?: throw RuntimeException("dogsList == null"))
+        _loading.postValue(false)
+        _dogsLoadError.postValue(false)
+    }
+
+    private fun onError() {
+        _dogsLoadError.postValue(true)
+        _loading.postValue(false)
+    }
+
+    private fun storeDogsLocally(dogsList: List<DogBreed>?) {
+        val list = dogsList ?: throw RuntimeException("dogsList == null")
         viewModelScope.launch {
             val dao = DogDatabase(getApplication()).dogDao()
             dao.deleteAllDogs()
-            val result = dao.insertAll(*dogs.toTypedArray())
+            val result = dao.insertAll(*dogsList.toTypedArray())
             var i = 0
-            while (i < dogs.size) {
-                dogs[i].uuid = result[i].toInt()
-                Log.d("DOG_ID", dogs.size.toString())
-//                Log.d("DOG_ID", i.toString())
+            while (i < list.size) {
+                list[i].uuid = result[i].toInt()
+//                Log.d("DOG_ID", dogsList.size.toString())
+                Log.d("DOG_ID", i.toString())
                 ++i
             }
-            _dogsList.value = Resource.success(dogs)
+            dogsRetrieved(dogsList)
         }
         prefHelper.saveUpdateTime(System.nanoTime())
     }
