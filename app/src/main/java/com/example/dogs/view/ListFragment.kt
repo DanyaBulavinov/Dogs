@@ -30,6 +30,7 @@ class ListFragment : Fragment() {
 
     private val dogListAdapter = DogListAdapter(arrayListOf())
 
+
     private var _binding: FragmentListBinding? = null
     private val binding: FragmentListBinding
         get() = _binding ?: throw RuntimeException("FragmentListBinding == null")
@@ -45,7 +46,7 @@ class ListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.getDogs()
+        viewModel.refresh()
 
         binding.dogsList.apply {
             layoutManager = LinearLayoutManager(context)
@@ -54,7 +55,7 @@ class ListFragment : Fragment() {
 
         binding.refreshLayout.setOnRefreshListener {
             viewSetup()
-            viewModel.getDogs()
+            viewModel.refreshBypassCache()
             binding.refreshLayout.isRefreshing = false
         }
 

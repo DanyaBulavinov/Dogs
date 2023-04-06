@@ -9,19 +9,19 @@
         android:name="com.example.dogs.view.ListFragment"
         android:label="ListFragment" >
         <action
-            android:id="@+id/action_listFragment_to_detainFragment"
-            app:destination="@id/detainFragment" />
+            android:id="@+id/action_listFragment_to_detailFragment"
+            app:destination="@id/detailFragment" />
     </fragment>
     <fragment
-        android:id="@+id/detainFragment"
+        android:id="@+id/detailFragment"
         android:name="com.example.dogs.view.DetailFragment"
         android:label="DetainFragment" >
         <action
-            android:id="@+id/action_detainFragment_to_listFragment"
+            android:id="@+id/action_detailFragment_to_listFragment"
             app:destination="@id/listFragment" />
         <argument
             android:name="dogUuid"
-            app:argType="string"
+            app:argType="integer"
             android:defaultValue="1" />
     </fragment>
 </navigation>

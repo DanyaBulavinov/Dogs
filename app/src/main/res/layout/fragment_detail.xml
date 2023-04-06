@@ -2,6 +2,12 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+        <variable
+            name="dog"
+            type="com.example.dogs.model.DogBreed" />
+    </data>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -12,9 +18,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
+            android:imageUrl="@{dog.imgUrl}"
             android:minHeight="200dp"
-            android:scaleType="fitCenter"
-            android:src="@mipmap/ic_dog_icon" />
+            android:scaleType="fitCenter" />
 
         <TextView
             android:id="@+id/dog_name"
@@ -24,7 +30,7 @@
             android:layout_below="@id/dog_image"
             android:layout_centerHorizontal="true"
             android:layout_margin="4dp"
-            android:text="DogName" />
+            android:text="@{dog.dogBreed}" />
 
         <TextView
             android:id="@+id/dog_purpose"
@@ -34,7 +40,7 @@
             android:layout_below="@id/dog_name"
             android:layout_centerHorizontal="true"
             android:layout_margin="4dp"
-            android:text="DogPurpose" />
+            android:text="@{dog.bredFor}" />
 
         <TextView
             android:id="@+id/dog_temperament"
@@ -44,7 +50,7 @@
             android:layout_below="@id/dog_purpose"
             android:layout_centerHorizontal="true"
             android:layout_margin="4dp"
-            android:text="DogTemperament" />
+            android:text="@{dog.temperament}" />
 
         <TextView
             android:id="@+id/dog_lifespan"
@@ -54,8 +60,7 @@
             android:layout_below="@id/dog_temperament"
             android:layout_centerHorizontal="true"
             android:layout_margin="4dp"
-            android:text="DogLifespan" />
-
+            android:text="@{dog.lifeSpan}" />
 
 
     </RelativeLayout>

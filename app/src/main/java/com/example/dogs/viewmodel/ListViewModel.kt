@@ -1,6 +1,8 @@
 package com.example.dogs.viewmodel
 
 import android.app.Application
+import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -31,7 +33,31 @@ class ListViewModel(application: Application, private val repository: Repository
         get() = _loading
 
 
-    fun getDogs() {
+    fun refresh() {
+        val updateTime = prefHelper.getUpdateTime()
+        Log.d("UPDATE_TIME", updateTime.toString())
+        if (updateTime != null && updateTime != 0L && System.nanoTime() - updateTime < refreshTime) {
+            getDogsFromDatabase()
+        } else {
+            getDogsFromRemote()
+        }
+    }
+
+    fun refreshBypassCache() {
+        getDogsFromRemote()
+    }
+
+    private fun getDogsFromDatabase() {
+        _loading.value = true
+        viewModelScope.launch {
+            val dogs = DogDatabase(getApplication()).dogDao().getAllDogs()
+            dogsRetrieved(dogs)
+            Toast.makeText(getApplication(), "Dogs retrieved from database", Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
+
+    private fun getDogsFromRemote() {
         viewModelScope.launch(Dispatchers.IO) {
             _loading.postValue(true)
             try {
@@ -39,6 +65,11 @@ class ListViewModel(application: Application, private val repository: Repository
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
                         storeDogsLocally(response.body())
+                        Toast.makeText(
+                            getApplication(),
+                            "Dogs retrieved from endpoint",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     } else {
                         onError()
                     }
@@ -65,13 +96,10 @@ class ListViewModel(application: Application, private val repository: Repository
         viewModelScope.launch {
             val dao = DogDatabase(getApplication()).dogDao()
             dao.deleteAllDogs()
-            val result = dao.insertAll(*dogsList.toTypedArray())
-            var i = 0
-            while (i < list.size) {
-                list[i].uuid = result[i].toInt()
-                ++i
-            }
-            dogsRetrieved(dogsList)
+            val insertedIds = dao.insertAll(*list.toTypedArray())
+            val retrievedDogs = dao.getAllDogs()
+            retrievedDogs.forEachIndexed { index, dog -> list[index].uuid = dog.uuid  }
+            dogsRetrieved(list)
         }
         prefHelper.saveUpdateTime(System.nanoTime())
     }

@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
         findFragmentById(R.id.fragmentContainerView) as NavHostFragment
         navController = navHostController.navController
         setupActionBarWithNavController(navController)
+
     }
 
     override fun onSupportNavigateUp(): Boolean {
