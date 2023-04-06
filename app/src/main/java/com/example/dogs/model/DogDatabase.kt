@@ -25,6 +25,5 @@ abstract class DogDatabase : RoomDatabase() {
             DogDatabase::class.java,
             "dodatabase"
         ).build()
-
     }
 }
